@@ -1,0 +1,18 @@
+[package]
+name = "hofstadter_butterfly"
+version = "0.2.0"
+authors = ["colt-browning <zabolotis@mail.ru>"]
+
+[dependencies]
+bigdecimal = { git = "https://github.com/akubera/bigdecimal-rs", branch = "develop" }
+line_drawing = "0.7"
+repng = "0.2"
+
+[[bin]]
+name = "main"
+path = "src/bin/main.rs"
+# won't be needed in Rust 2018
+
+[[bin]]
+name = "txt2img"
+path = "src/bin/txt2img.rs"
