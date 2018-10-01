@@ -66,9 +66,9 @@ pub trait Appr: Decimal {
 		(int, None)
 	}
 
-	fn eps(i64) -> Self;
-	fn accu(self, i64) -> Self;
-	fn cos_rational_x2(i64, i64, i64) -> Self;
+	fn eps(_: i64) -> Self;
+	fn accu(self, _: i64) -> Self;
+	fn cos_rational_x2(p: i64, q: i64, accu: i64) -> Self;
 	fn reduce_args(p: i64, q: i64) -> (u32, u32, i8) {
 		assert!(q != 0);
 		let mut p: u32 = p.abs() as u32;

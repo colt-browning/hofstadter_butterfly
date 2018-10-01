@@ -18,7 +18,7 @@ enum Format {
 
 use Format::*;
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let mut args = std::env::args().skip(1);
 	let format = match args.next().unwrap_or(String::new()).as_ref() {
 		"png" => Png,
