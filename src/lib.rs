@@ -1,7 +1,7 @@
 extern crate bigdecimal;
 use bigdecimal::BigDecimal;
 
-pub use bigdecimal::{Zero, One, Signed, Num};
+use bigdecimal::{Zero, One, Signed, Num};
 
 use std::ops;
 

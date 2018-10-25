@@ -1,4 +1,4 @@
-use ::{Zero, One, Signed};
+use crate::{Zero, One, Signed};
 use std::{ops, fmt};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -475,9 +475,9 @@ mod tests {
     fn eval() {
 		let p = Polynomial::from(vec![4, 5, 6]);
 		let x = 2;
-        assert_eq!(p.eval(x), 38);
+		assert_eq!(p.eval(x), 38);
 		let x = 2.0;
-        assert_eq!(p.eval(x), 38.0);
+		assert_eq!(p.eval(x), 38.0);
     }
 	
 	#[test]
@@ -503,14 +503,17 @@ mod tests {
 				vec![41.0, 34.0, 11.0],
 				vec![51.0, 90.0, 41.0],
 			]});
-		assert_eq!(
-		Polynomial::from(vec![3, -2, 1]).eval_mul(&::matrix2x2::Matrix::new((
-			(3, -2),
-			(1, 9)
-		))), ::matrix2x2::Matrix::new((
-			(4, -20),
-			(10, 64)
-		)));
+		{
+			use crate::matrix2x2::Matrix;
+			assert_eq!(
+			Polynomial::from(vec![3, -2, 1]).eval_mul(&Matrix::new((
+				(3, -2),
+				(1, 9)
+			))), Matrix::new((
+				(4, -20),
+				(10, 64)
+			)));
+		}
 	}
 	
 	#[test]

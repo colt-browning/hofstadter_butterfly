@@ -9,6 +9,7 @@ extern crate repng;
 use std::{
 	io::{stdin, prelude::*},
 	str::FromStr,
+	fs::File,
 };
 
 enum Format {
@@ -74,11 +75,11 @@ cat out.txt | cargo run --release --bin txt2img [png|svg]");
 					}
 				}
 			}
-			repng::encode(std::fs::File::create("out.png")?, n, n, &pixels)?;
+			repng::encode(File::create("out.png")?, n, n, &pixels)?;
 		},
 		Svg => {
 			let (width, height) = (600, 450);
-			let mut f = std::fs::File::create(&std::path::Path::new("out.svg"))?;
+			let mut f = File::create("out.svg")?;
 			writeln!(f, r#"<?xml version="1.0" encoding="UTF-8"?>"#);
 			writeln!(f, r#"<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">"#, width, height);
 			writeln!(f, r#"<g fill="transparent" stroke="black" stroke-width="0.5" stroke-linecap="square">"#);

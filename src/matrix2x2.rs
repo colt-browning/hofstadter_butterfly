@@ -1,4 +1,4 @@
-use ::{Zero, One};
+use crate::{Zero, One};
 use std::ops;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
