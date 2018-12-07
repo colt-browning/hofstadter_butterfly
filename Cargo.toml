@@ -1,7 +1,8 @@
 [package]
 name = "hofstadter_butterfly"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["colt-browning <zabolotis@mail.ru>"]
+edition = "2018"
 
 [dependencies]
 bigdecimal = { git = "https://github.com/akubera/bigdecimal-rs", branch = "develop" }

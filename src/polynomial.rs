@@ -96,7 +96,7 @@ impl<T> Polynomial<T> where T: Zero + Clone {
 	
 	pub fn make_odd_or_even(mut self) -> Self {
 		let t = self.degree() % 2;
-		for (n, mut a) in self.factors.iter_mut().enumerate() {
+		for (n, a) in self.factors.iter_mut().enumerate() {
 			if n % 2 != t {
 				*a = T::zero();
 			}
@@ -396,8 +396,8 @@ mod tests {
 	impl<'a> ops::Mul<&'a f32> for Matrix {
 		type Output = Matrix;
 		fn mul(mut self, rhs: &f32) -> Matrix {
-			for mut row in &mut self.m {
-				for mut v in row {
+			for row in &mut self.m {
+				for v in row {
 					*v *= rhs;
 				}
 			}

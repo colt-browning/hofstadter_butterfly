@@ -1,10 +1,6 @@
-extern crate bigdecimal;
 use bigdecimal::{BigDecimal, ToPrimitive};
 
-extern crate line_drawing;
 use line_drawing::Supercover as Line;
-
-extern crate repng;
 
 use std::{
 	io::{stdin, prelude::*},
@@ -17,7 +13,7 @@ enum Format {
 	Svg,
 }
 
-use Format::*;
+use crate::Format::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 	let mut args = std::env::args().skip(1);
@@ -80,11 +76,11 @@ cat out.txt | cargo run --release --bin txt2img [png|svg]");
 		Svg => {
 			let (width, height) = (600, 450);
 			let mut f = File::create("out.svg")?;
-			writeln!(f, r#"<?xml version="1.0" encoding="UTF-8"?>"#);
-			writeln!(f, r#"<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">"#, width, height);
-			writeln!(f, r#"<g fill="transparent" stroke="black" stroke-width="0.5" stroke-linecap="square">"#);
+			writeln!(f, r#"<?xml version="1.0" encoding="UTF-8"?>"#)?;
+			writeln!(f, r#"<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="{}" height="{}">"#, width, height)?;
+			writeln!(f, r#"<g fill="transparent" stroke="black" stroke-width="0.5" stroke-linecap="square">"#)?;
 			for ((num, denom), intervals) in v {
-				write!(f, r#"<path id="{}_{}" d=""#, num, denom);
+				write!(f, r#"<path id="{}_{}" d=""#, num, denom)?;
 				let x = (num * height) as f32 / denom as f32;
 				let x = if x == 0.0 {1.0} else {x};
 				for (y1, y2) in intervals {
@@ -93,12 +89,12 @@ cat out.txt | cargo run --release --bin txt2img [png|svg]");
 					let y1: BigDecimal = (y1 + BigDecimal::from(4)) / 8 * BigDecimal::from(width);
 					let prec = 38;
 					let y1 = if y1.digits() > prec {y1.with_prec(prec)} else {y1};
-					write!(f, "M {} {} h {} ", y1, x, w);
+					write!(f, "M {} {} h {} ", y1, x, w)?;
 				}
-				writeln!(f, "\"/>");
+				writeln!(f, "\"/>")?;
 			}
-			writeln!(f, "</g>");
-			writeln!(f, "</svg>");
+			writeln!(f, "</g>")?;
+			writeln!(f, "</svg>")?;
 		},
 	}
 	Ok(())

@@ -1,7 +1,5 @@
-extern crate hofstadter_butterfly;
 use hofstadter_butterfly::Appr;
 
-extern crate bigdecimal;
 use bigdecimal::BigDecimal;
 
 fn help() {
