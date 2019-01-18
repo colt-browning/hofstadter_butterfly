@@ -3,10 +3,10 @@ use bigdecimal::{Zero, One, Signed, Num, BigDecimal};
 use std::ops;
 
 mod polynomial;
-use crate::polynomial::Polynomial;
+use polynomial::Polynomial;
 
 mod matrix2x2;
-use crate::matrix2x2::Matrix;
+use matrix2x2::Matrix;
 
 pub trait Decimal: Clone + PartialOrd + Num + One + Signed + ops::Neg<Output = Self> + From<i32> + From<f32> {}
 impl Decimal for f64 {}
