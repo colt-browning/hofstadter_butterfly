@@ -2,7 +2,7 @@ Draw [Hofstadter's butterfly](https://en.wikipedia.org/wiki/Hofstadter%27s_butte
 
 To reproduce [the vector plot](https://commons.wikimedia.org/wiki/File:Hofstadter%27s_butterfly_vector_70.svg):
 
-`cargo run --release --bin main d intervals_upto 70 >out.txt`
+`cargo run --release d intervals_upto 70 >out.txt`
 
 `cat out.txt | cargo run --release --bin txt2img svg`
 

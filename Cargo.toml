@@ -1,8 +1,9 @@
 [package]
 name = "hofstadter_butterfly"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["colt-browning <zabolotis@mail.ru>"]
 edition = "2018"
+default-run = "main"
 
 [dependencies]
 bigdecimal = "0.0.15"
