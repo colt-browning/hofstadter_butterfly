@@ -2,8 +2,7 @@ use hofstadter_butterfly::Appr;
 
 use bigdecimal::BigDecimal;
 
-fn help() {
-	println!("\
+const HELP: &'static str = "\
 Usage:
 <run> <t> trq <p> <q>
 <run> <t> trq_upto <qmax>
@@ -11,9 +10,12 @@ Usage:
 <run> <t> check
 <run> <t> check_full
 <run> d intervals_upto <qmax>
-<run> d intervals_farey <qmax>
+<run> d intervals_farey <number of Farey iterations>
 
-Underlying type <t> is 'f' for f64 or 'd' for BigDecimal.")
+Underlying type <t> is 'f' for f64 or 'd' for BigDecimal.";
+
+fn help() {
+	eprintln!("{}", HELP)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -48,7 +50,7 @@ impl UnderlyingType {
 			UnderlyingType::F64 => panic!("intervals_auto make no sense for f64"),
 			UnderlyingType::BigDecimal => {
 				let (pol, na) = BigDecimal::intervals_auto(p, q, accu);
-				(pol.iter().map(|x| {format!("{}..{}", x.0, x.1)}).collect::<Vec<_>>().join(", "), na.unwrap())
+				(pol.iter().map(|x| {format!("{}..{}", x.0, x.1)}).collect::<Vec<_>>().join(", "), na.expect("Failed to find required accuracy"))
 			},
 		}
 	}
@@ -67,12 +69,12 @@ fn main() {
 	
 	match args.next().unwrap_or(String::new()).as_ref() {
 		"trq" => {
-			let p: usize = args.next().unwrap().parse().unwrap();
-			let q: usize = args.next().unwrap().parse().unwrap();
+			let p: usize = args.next().expect(HELP).parse().expect(HELP);
+			let q: usize = args.next().expect(HELP).parse().expect(HELP);
 			println!("{}", ut.trq(p, q));
 		},
 		"trq_upto" => {
-			let qmax: usize = args.next().unwrap().parse().unwrap();
+			let qmax: usize = args.next().expect(HELP).parse().expect(HELP);
 			for q in 1..=qmax {
 				for p in (1..=q/2).filter(|x| coprime(*x, q)) {
 					println!("[{}, {}] -> {},", p, q, ut.trq(p, q));
@@ -80,13 +82,13 @@ fn main() {
 			}
 		},
 		"intervals" => {
-			let p: usize = args.next().unwrap().parse().unwrap();
-			let q: usize = args.next().unwrap().parse().unwrap();
+			let p: usize = args.next().expect(HELP).parse().expect(HELP);
+			let q: usize = args.next().expect(HELP).parse().expect(HELP);
 			let (vl, vs) = ut.intervals(p, q);
 			println!("{} [{}]", vl, vs);
 		},
 		"intervals_upto" => {
-			let qmax: usize = args.next().unwrap().parse().unwrap();
+			let qmax: usize = args.next().expect(HELP).parse().expect(HELP);
 			let mut accu = 4;
 			for q in 1..=qmax {
 				for p in (0..=q/2).filter(|x| coprime(*x, q)) {
@@ -97,7 +99,7 @@ fn main() {
 			}
 		},
 		"intervals_farey" => {
-			let n: usize = args.next().unwrap().parse().unwrap();
+			let n: usize = args.next().expect(HELP).parse().expect(HELP);
 			let mut accu = 4;
 			for (p, q) in farey(n).into_iter() {
 				let (int, naccu) = ut.intervals_auto(p, q, accu);
