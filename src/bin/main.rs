@@ -11,6 +11,7 @@ Usage:
 <run> <t> check
 <run> <t> check_full
 <run> d intervals_upto <qmax>
+<run> d intervals_farey <qmax>
 
 Underlying type <t> is 'f' for f64 or 'd' for BigDecimal.")
 }
@@ -95,6 +96,15 @@ fn main() {
 				}
 			}
 		},
+		"intervals_farey" => {
+			let n: usize = args.next().unwrap().parse().unwrap();
+			let mut accu = 4;
+			for (p, q) in farey(n).into_iter() {
+				let (int, naccu) = ut.intervals_auto(p, q, accu);
+				accu = naccu;
+				println!("{}/{}: {}", p, q, int);
+			}
+		},
 		"check" => {
 			for q in 2.. {
 				let vl = ut.intervals(1, q).0;
@@ -138,6 +148,26 @@ pub fn coprime(p: usize, q: usize) -> bool {
 	m == 1
 }
 
+pub fn farey(n: usize) -> Vec<(usize, usize)> {
+	let right = (1, 2);
+	let mut f = vec![(0, 1), right];
+//	let mut fseq = f.clone();
+	for _ in 0..n {
+		let mut nf = Vec::new();
+		for i in 0..f.len()-1 {
+			nf.push(f[i]);
+			let ((p1, q1), (p2, q2)) = (f[i], f[i+1]);
+			let pq = (p1+p2, q1+q2);
+			nf.push(pq);
+//			fseq.push(pq);
+		}
+		nf.push(right);
+		f = nf;
+	}
+	f.sort_by_key(|(_, q)| *q);
+	f
+}
+
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -158,5 +188,10 @@ mod tests {
 		assert!(!coprime(4, 2));
 		assert!(!coprime(3, 0));
 		assert!(coprime(1024, 61));
+	}
+	
+	#[test]
+	fn farey_test() {
+		assert_eq!(farey(4), vec![(0, 1), (1, 2), (1, 3), (1, 4), (1, 5), (2, 5), (1, 6), (2, 7), (3, 7), (3, 8), (2, 9), (4, 9), (3, 10), (3, 11), (4, 11), (5, 12), (5, 13)]);
 	}
 }
