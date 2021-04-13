@@ -1,6 +1,6 @@
 [package]
 name = "hofstadter_butterfly"
-version = "0.3.4"
+version = "0.3.5"
 authors = ["colt-browning <zabolotis@mail.ru>"]
 edition = "2018"
 default-run = "main"

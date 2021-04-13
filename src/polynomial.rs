@@ -42,7 +42,7 @@ impl<T> One for Polynomial<T> where T: Zero + One + Clone + PartialEq {
 	}
 }
 
-impl<T> fmt::Display for Polynomial<T> where T: fmt::Display + Zero + One + Signed {
+impl<T> fmt::Display for Polynomial<T> where T: fmt::Display + Signed {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		if self.degree() == 0 && self.factors[0].is_zero() {
 			return write!(f, "{}", self.factors[0])
@@ -110,8 +110,6 @@ impl<T> Polynomial<T> where T: Zero + Clone {
 // currently used in tests only
 		where X:
 			Clone +
-			ops::Add +
-			ops::Mul +
 			Zero +
 			One +
 			ops::Mul<&'a T, Output = X>
@@ -129,8 +127,6 @@ impl<T> Polynomial<T> where T: Zero + Clone {
 	pub fn eval_ref<X>(&self, x: &X) -> X
 		where X:
 			Clone +
-			ops::Add +
-			ops::Mul +
 			Zero +
 			One +
 			From<T>
@@ -148,8 +144,6 @@ impl<T> Polynomial<T> where T: Zero + Clone {
 	pub fn eval<X>(&self, x: X) -> X
 		where X:
 			Copy +
-			ops::Add +
-			ops::Mul +
 			Zero +
 			One +
 			From<T>
@@ -250,7 +244,7 @@ impl<T> ops::Rem for Polynomial<T> where T: Zero + ops::Sub<Output=T> + ops::Mul
 	}
 }
 
-impl<T> Polynomial<T> where T: Zero + One + ops::Sub<Output=T> + ops::Mul<Output=T> + ops::Div<Output=T> + Clone {
+impl<T> Polynomial<T> where T: Zero + One + ops::Sub<Output=T> + ops::Div<Output=T> + Clone {
 	fn _gcd(&self, rhs: &Self) -> Self {
 		let mut a = self.clone();
 		let mut b = rhs.clone();
@@ -300,15 +294,10 @@ impl<T> Polynomial<T> where T:
 }
 
 impl<T> Polynomial<T> where T:
-	Zero
-	+ One
+	Signed
 	+ ops::Sub<Output=T>
-	+ ops::Mul<Output=T>
 	+ ops::Div<Output=T>
-	+ ops::Neg<Output=T>
 	+ From<i32>
-	+ From<f32>
-	+ Signed
 	+ PartialOrd
 	+ Clone
 {
@@ -349,10 +338,10 @@ impl<T> Polynomial<T> where T:
 		} else if csl - csr == 1 {
 			return vec!((left, right))
 		}
-		let middle = (right.clone() + left.clone()) / (2.0f32).into();
+		let middle = (right.clone() + left.clone()) / (2i32).into();
 		let ssm = ss.iter().map(|p| p.eval_ref(&middle).is_positive()).collect::<Vec<_>>();
 		let csm = ssm.iter().zip(&ssm[1..]).filter(|(x, y)| { **x^*y }).count();
-		assert!(csm <= csl && csm >= csr, "not {} <= {} <= {}", csr, csm, csl);
+//		assert!(csm <= csl && csm >= csr, "not {} <= {} <= {}", csr, csm, csl);
 		let (mut lrl, mut lrr) = (
 			self.localize_roots_internal(left, middle.clone(), csl, csm, ss),
 			self.localize_roots_internal(middle, right, csm, csr, ss)
@@ -370,7 +359,7 @@ impl<T> Polynomial<T> where T:
 		v.append(&mut self.localize_roots(left, right).into_iter().map(|(mut l, mut r)| {
 			let vrp = self.eval_ref(&r).is_positive();
 			while r.clone() - l.clone() > eps {
-				let m = (r.clone() + l.clone()) / (2.0f32).into();
+				let m = (r.clone() + l.clone()) / (2i32).into();
 				let vmp = self.eval_ref(&m).is_positive();
 				if vmp == vrp {
 					r = m;

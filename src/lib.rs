@@ -1,14 +1,12 @@
 use bigdecimal::{Zero, One, Signed, Num, BigDecimal};
 
-use std::ops;
-
 mod polynomial;
 use polynomial::Polynomial;
 
 mod matrix2x2;
 use matrix2x2::Matrix;
 
-pub trait Decimal: Clone + PartialOrd + Num + One + Signed + ops::Neg<Output = Self> + From<i32> + From<f32> {}
+pub trait Decimal: Clone + PartialOrd + Num + Signed + From<i32> {}
 impl Decimal for f64 {}
 impl Decimal for BigDecimal {}
 
