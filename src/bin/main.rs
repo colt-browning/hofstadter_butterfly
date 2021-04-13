@@ -9,8 +9,8 @@ Usage:
 <run> <t> intervals <p> <q>
 <run> <t> check
 <run> <t> check_full
-<run> d intervals_upto <qmax>
-<run> d intervals_farey <number of Farey iterations>
+<run> <t> intervals_upto <qmax>
+<run> <t> intervals_farey <number of Farey iterations>
 
 Underlying type <t> is 'f' for f64 or 'd' for BigDecimal.";
 
@@ -47,7 +47,8 @@ impl UnderlyingType {
 	
 	fn intervals_auto(self, p: usize, q: usize, accu: &mut i64) -> String {
 		match self {
-			UnderlyingType::F64 => panic!("intervals_auto make no sense for f64"),
+			UnderlyingType::F64 => f64::
+				intervals(p, q, 0).iter().map(|x| {format!("{}..{}", x.0, x.1)}).collect::<Vec<_>>().join(", "),
 			UnderlyingType::BigDecimal => {
 				let (pol, na) = BigDecimal::intervals_auto(p, q, *accu);
 				*accu = na.expect("Failed to find required accuracy");

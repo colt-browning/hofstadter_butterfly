@@ -352,7 +352,7 @@ impl<T> Polynomial<T> where T:
 		let middle = (right.clone() + left.clone()) / (2.0f32).into();
 		let ssm = ss.iter().map(|p| p.eval_ref(&middle).is_positive()).collect::<Vec<_>>();
 		let csm = ssm.iter().zip(&ssm[1..]).filter(|(x, y)| { **x^*y }).count();
-//		assert!(csm <= csl && csm >= csr);
+		assert!(csm <= csl && csm >= csr, "not {} <= {} <= {}", csr, csm, csl);
 		let (mut lrl, mut lrr) = (
 			self.localize_roots_internal(left, middle.clone(), csl, csm, ss),
 			self.localize_roots_internal(middle, right, csm, csr, ss)
