@@ -45,12 +45,13 @@ impl UnderlyingType {
 		}
 	}
 	
-	fn intervals_auto(self, p: usize, q: usize, accu: i64) -> (String, i64) {
+	fn intervals_auto(self, p: usize, q: usize, accu: &mut i64) -> String {
 		match self {
 			UnderlyingType::F64 => panic!("intervals_auto make no sense for f64"),
 			UnderlyingType::BigDecimal => {
-				let (pol, na) = BigDecimal::intervals_auto(p, q, accu);
-				(pol.iter().map(|x| {format!("{}..{}", x.0, x.1)}).collect::<Vec<_>>().join(", "), na.expect("Failed to find required accuracy"))
+				let (pol, na) = BigDecimal::intervals_auto(p, q, *accu);
+				*accu = na.expect("Failed to find required accuracy");
+				pol.iter().map(|x| {format!("{}..{}", x.0, x.1)}).collect::<Vec<_>>().join(", ")
 			},
 		}
 	}
@@ -92,8 +93,7 @@ fn main() {
 			let mut accu = 4;
 			for q in 1..=qmax {
 				for p in (0..=q/2).filter(|x| coprime(*x, q)) {
-					let (int, naccu) = ut.intervals_auto(p, q, accu);
-					accu = naccu;
+					let int = ut.intervals_auto(p, q, &mut accu);
 					println!("{}/{}: {}", p, q, int);
 				}
 			}
@@ -102,8 +102,7 @@ fn main() {
 			let n: usize = args.next().expect(HELP).parse().expect(HELP);
 			let mut accu = 4;
 			for (p, q) in farey(n).into_iter() {
-				let (int, naccu) = ut.intervals_auto(p, q, accu);
-				accu = naccu;
+				let int = ut.intervals_auto(p, q, &mut accu);
 				println!("{}/{}: {}", p, q, int);
 			}
 		},
