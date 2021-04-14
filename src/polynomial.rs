@@ -48,9 +48,7 @@ impl<T> fmt::Display for Polynomial<T> where T: fmt::Display + Signed {
 			return write!(f, "{}", self.factors[0])
 		}
 		let mut empty = true;
-		for (n, a) in self.factors.iter().enumerate().filter(|(_, a)| {
-			!a.is_zero()
-		}) {
+		for (n, a) in self.factors.iter().enumerate().filter(|(_, a)| !a.is_zero()) {
 			if !empty && a.is_positive() {
 				write!(f, "+")?;
 			}
@@ -165,7 +163,7 @@ impl<T> ops::Add for Polynomial<T> where T: Zero + Clone {
 	fn add(mut self, mut rhs: Self) -> Self {
 		self.extend(rhs.factors.len());
 		rhs.extend(self.factors.len());
-		let v: Vec<T> = self.factors.into_iter().zip(rhs.factors.into_iter()).map(|(l, r)| { l + r }).collect();
+		let v: Vec<T> = self.factors.into_iter().zip(rhs.factors.into_iter()).map(|(l, r)| l + r).collect();
 		Self::from(v).cleanup()
 	}
 }
@@ -175,7 +173,7 @@ impl<T> ops::Sub for Polynomial<T> where T: Zero + ops::Sub<Output=T> + Clone {
 	fn sub(mut self, mut rhs: Self) -> Self {
 		self.extend(rhs.factors.len());
 		rhs.extend(self.factors.len());
-		let v: Vec<T> = self.factors.into_iter().zip(rhs.factors.into_iter()).map(|(l, r)| { l - r }).collect();
+		let v: Vec<T> = self.factors.into_iter().zip(rhs.factors.into_iter()).map(|(l, r)| l - r).collect();
 		Self::from(v).cleanup()
 	}
 }
@@ -216,9 +214,7 @@ impl<T> ops::Mul for Polynomial<T> where T: Zero + ops::Mul<Output=T> + Clone {
 		let v: Vec<T> = (0..=(self.degree() + rhs.degree())).map(|n| {
 			let b = if n > rhs.degree() { n - rhs.degree() } else {0};
 			let e = if n > self.degree() { self.degree() } else {n};
-			(b..=e).map(|i| {
-				self.factors[i].clone() * rhs.factors[n-i].clone()
-			}).fold(T::zero(), |a, b| a + b)
+			(b..=e).map(|i| self.factors[i].clone() * rhs.factors[n-i].clone()).fold(T::zero(), |a, b| a + b)
 		}).collect();
 		Self::from(v).cleanup()
 	}
@@ -264,7 +260,7 @@ impl<T> Polynomial<T> where T: Zero + Clone + ops::Mul<Output=T> + From<i32> {
 			Polynomial::zero()
 		} else {
 			Polynomial {
-				factors: self.factors.drain(1..).enumerate().map(|(n, a)| { T::from((n+1) as i32) * a }).collect(),
+				factors: self.factors.drain(1..).enumerate().map(|(n, a)| T::from((n+1) as i32) * a).collect(),
 			}
 		}
 	}
@@ -272,7 +268,6 @@ impl<T> Polynomial<T> where T: Zero + Clone + ops::Mul<Output=T> + From<i32> {
 
 impl<T> Polynomial<T> where T:
 	Zero
-	+ One
 	+ ops::Sub<Output=T>
 	+ ops::Mul<Output=T>
 	+ ops::Div<Output=T>
@@ -287,7 +282,7 @@ impl<T> Polynomial<T> where T:
 		let mut seq = vec![self.clone(), self.clone().derivative()]; // assuming square-free case
 		while seq.last().unwrap().degree() > 0 {
 			let p = seq[seq.len()-2].clone() % seq.last().unwrap().clone();
-			seq.push(p * (-T::one()));
+			seq.push(-p);
 		}
 		seq
 	}
@@ -319,8 +314,8 @@ impl<T> Polynomial<T> where T:
 			ss.iter().map(|p| p.eval_ref(&right).is_positive()).collect::<Vec<_>>(),
 		);
 		let (csl, csr) = (
-			ssl.iter().zip(&ssl[1..]).filter(|(x, y)| { **x^*y }).count(),
-			ssr.iter().zip(&ssr[1..]).filter(|(x, y)| { **x^*y }).count(),
+			ssl.iter().zip(&ssl[1..]).filter(|(x, y)| *x^*y).count(),
+			ssr.iter().zip(&ssr[1..]).filter(|(x, y)| *x^*y).count(),
 		);
 //		assert!(csr <= csl);
 		if let Some(n) = expected_roots {
@@ -340,8 +335,8 @@ impl<T> Polynomial<T> where T:
 		}
 		let middle = (right.clone() + left.clone()) / (2i32).into();
 		let ssm = ss.iter().map(|p| p.eval_ref(&middle).is_positive()).collect::<Vec<_>>();
-		let csm = ssm.iter().zip(&ssm[1..]).filter(|(x, y)| { **x^*y }).count();
-//		assert!(csm <= csl && csm >= csr, "not {} <= {} <= {}", csr, csm, csl);
+		let csm = ssm.iter().zip(&ssm[1..]).filter(|(x, y)| *x^*y).count();
+//		assert!(csm <= csl && csm >= csr, "{}:  not {} >= {} >= {}", ss[0].degree(), csl, csm, csr);
 		let (mut lrl, mut lrr) = (
 			self.localize_roots_internal(left, middle.clone(), csl, csm, ss),
 			self.localize_roots_internal(middle, right, csm, csr, ss)
@@ -453,10 +448,6 @@ mod tests {
 					vec![0.0, 0.0, 1.0],
 				],
 			}
-		}
-		
-		fn is_one(&self) -> bool {
-			*self == Self::one()
 		}
 	}
 	

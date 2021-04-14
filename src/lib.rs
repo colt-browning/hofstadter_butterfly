@@ -24,7 +24,7 @@ pub trait Appr: Decimal {
 			qq = qm * qq;
 		}
 		let p = qq.trace().make_odd_or_even();
-		p.into_vec().into_iter().map(|x| { if x.is_one() || x.is_zero() {x} else {x.accu(accu)} }).collect::<Vec<_>>().into()
+		p.into_vec().into_iter().map(|x| if x.is_one() || x.is_zero() {x} else {x.accu(accu)}).collect::<Vec<_>>().into()
 	}
 
 	fn intervals(p: usize, q: usize, accu: i64) -> Vec<(Self, Self)> {
@@ -33,15 +33,31 @@ pub trait Appr: Decimal {
 		}
 		let pol = Self::trq(p, q, accu);
 		let eps = Self::eps(accu);
-		let (mut r1, mut r2) = (
-			(pol.clone() - Self::from(4)).find_roots(Self::from(-4), Self::from(4), eps.clone()).into_iter().map(|x| {x.accu(accu)}).collect::<Vec<_>>(),
-			(pol.clone() + Self::from(4)).find_roots(Self::from(-4), Self::from(4), eps        ).into_iter().map(|x| {x.accu(accu)}).collect::<Vec<_>>()
-		);
-		r1.append(&mut r2);
-		assert!(r1.len() % 2 == 0);
-		r1.sort_by(|a, b| a.partial_cmp(b).unwrap());
+		let mut r = if q % 2 == 0 {
+			let mut v = pol.into_vec();
+			v[0] = Self::from(if q % 4 == 0 {8} else {-8});
+			for i in 1..=q/2 {
+				v.swap(i, 2*i);
+			}
+			v.truncate(q/2+1);
+			let mut p1 = Polynomial::from(v.clone());
+			let mut r1 = p1.find_roots(Self::zero(), Self::from(16), eps.clone());
+			v.remove(0);
+			let mut p2 = Polynomial::from(v);
+			let mut r2 = p2.find_roots(Self::zero(), Self::from(16), eps);
+			let mut r = vec![Self::zero()];
+			r.append(&mut r1);
+			r.append(&mut r2);
+			r.into_iter().map(|x| x.sqrt()).collect()
+		} else {
+			(pol + Self::from(4)).find_roots(Self::from(-4), Self::from(4), eps)
+		};
+		r = r.into_iter().map(|x| x.accu(accu)).collect();
+		let mut nr = r.iter().map(|x| -x.clone()).collect();
+		r.append(&mut nr);
+		r.sort_by(|a, b| a.partial_cmp(b).unwrap());
 		let mut r2 = Vec::new();
-		let mut ri = r1.into_iter();
+		let mut ri = r.into_iter();
 		while let Some(x1) = ri.next() {
 			let x2 = ri.next().unwrap();
 			r2.push((x1, x2));
@@ -63,6 +79,7 @@ pub trait Appr: Decimal {
 
 	fn eps(_: i64) -> Self;
 	fn accu(self, _: i64) -> Self;
+	fn sqrt(self) -> Self;
 	fn cos_rational_x2(p: i64, q: i64, accu: i64) -> Self;
 	fn reduce_args(p: i64, q: i64) -> (u32, u32, i8) {
 		assert!(q != 0);
@@ -87,7 +104,11 @@ impl Appr for f64 {
 	}
 
 	fn eps(_q: i64) -> Self {
-		1e-15
+		1e-14
+	}
+
+	fn sqrt(self) -> Self {
+		self.sqrt()
 	}
 
 	fn cos_rational_x2(p: i64, q: i64, _accu: i64) -> f64 {
@@ -115,6 +136,10 @@ impl Appr for BigDecimal {
 	
 	fn eps(accu: i64) -> Self {
 		BigDecimal::new(1.into(), accu)
+	}
+
+	fn sqrt(self) -> Self {
+		(&self).sqrt().unwrap()
 	}
 
 	fn cos_rational_x2(p: i64, q: i64, accu: i64) -> BigDecimal {
