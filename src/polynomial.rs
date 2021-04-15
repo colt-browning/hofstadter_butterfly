@@ -91,16 +91,6 @@ impl<T> Polynomial<T> where T: Zero + Clone {
 			self.factors.push(Zero::zero());
 		}
 	}
-	
-	pub fn make_odd_or_even(mut self) -> Self {
-		let t = self.degree() % 2;
-		for (n, a) in self.factors.iter_mut().enumerate() {
-			if n % 2 != t {
-				*a = T::zero();
-			}
-		}
-		self
-	}
 }
 	
 impl<T> Polynomial<T> where T: Zero + Clone {

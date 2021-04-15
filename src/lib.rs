@@ -23,7 +23,7 @@ pub trait Appr: Decimal {
 			));
 			qq = qm * qq;
 		}
-		let p = qq.trace().make_odd_or_even();
+		let p = qq.trace();
 		p.into_vec().into_iter().map(|x| if x.is_one() || x.is_zero() {x} else {x.accu(accu)}).collect::<Vec<_>>().into()
 	}
 
@@ -50,7 +50,12 @@ pub trait Appr: Decimal {
 			r.append(&mut r2);
 			r.into_iter().map(|x| x.sqrt()).collect()
 		} else {
-			(pol + Self::from(4)).find_roots(Self::from(-4), Self::from(4), eps)
+			let mut v = pol.into_vec();
+			v[0] = Self::from(4);
+			for i in 1..=q/2 {
+				v[2*i] = Self::zero();
+			}
+			Polynomial::from(v).find_roots(Self::from(-4), Self::from(4), eps)
 		};
 		r = r.into_iter().map(|x| x.accu(accu)).collect();
 		let mut nr = r.iter().map(|x| -x.clone()).collect();
