@@ -286,18 +286,18 @@ impl<T> Polynomial<T> where T:
 	+ PartialOrd
 	+ Clone
 {
-	pub fn localize_roots(&self, left: T, right: T) -> Vec<(T, T)> {
+	pub fn localize_roots(&self, left: T, right: T, eps: &T) -> Vec<(T, T)> {
 		if right <= left {
 			return vec![]
 		}
-		self.try_localize_roots_internal(left, right, None).unwrap()
+		self.try_localize_roots_internal(left, right, None, eps).unwrap()
 	}
 	
-	pub fn try_localize_roots(&self, left: T, right: T, expected_roots: usize) -> Result<Vec<(T, T)>, usize> {
-		self.try_localize_roots_internal(left, right, Some(expected_roots))
+	pub fn try_localize_roots(&self, left: T, right: T, expected_roots: usize, eps: &T) -> Result<Vec<(T, T)>, usize> {
+		self.try_localize_roots_internal(left, right, Some(expected_roots), eps)
 	}
 	
-	fn try_localize_roots_internal(&self, left: T, right: T, expected_roots: Option<usize>) -> Result<Vec<(T, T)>, usize> {
+	fn try_localize_roots_internal(&self, left: T, right: T, expected_roots: Option<usize>, eps: &T) -> Result<Vec<(T, T)>, usize> {
 		let ss = self.sturm_sequence();
 		let (ssl, ssr) = (
 			ss.iter().map(|p| p.eval_ref(&left).is_positive()).collect::<Vec<_>>(),
@@ -314,22 +314,33 @@ impl<T> Polynomial<T> where T:
 				return Err(r)
 			}
 		}
-		Ok(self.localize_roots_internal(left, right, csl, csr, &ss))
+		let roots = self.localize_roots_internal(left, right, csl, csr, &ss, &eps);
+		if let Some(n) = expected_roots {
+			let r = roots.len();
+			if r != n {
+				return Err(r)
+			}
+		}
+		Ok(roots)
 	}
 
-	fn localize_roots_internal(&self, left: T, right: T, csl: usize, csr: usize, ss: &Vec<Self>) -> Vec<(T, T)> {
+	fn localize_roots_internal(&self, left: T, right: T, csl: usize, csr: usize, ss: &Vec<Self>, eps: &T) -> Vec<(T, T)> {
 		if csr == csl {
 			return vec![]
 		} else if csl - csr == 1 {
 			return vec!((left, right))
+		}
+		let d = right.clone() - left.clone();
+		if d < eps.clone() {
+			return vec![(left, right); csl - csr]
 		}
 		let middle = (right.clone() + left.clone()) / (2i32).into();
 		let ssm = ss.iter().map(|p| p.eval_ref(&middle).is_positive()).collect::<Vec<_>>();
 		let csm = ssm.iter().zip(&ssm[1..]).filter(|(x, y)| *x^*y).count();
 //		assert!(csm <= csl && csm >= csr, "{}:  not {} >= {} >= {}", ss[0].degree(), csl, csm, csr);
 		let (mut lrl, mut lrr) = (
-			self.localize_roots_internal(left, middle.clone(), csl, csm, ss),
-			self.localize_roots_internal(middle, right, csm, csr, ss)
+			self.localize_roots_internal(left, middle.clone(), csl, csm, ss, eps),
+			self.localize_roots_internal(middle, right, csm, csr, ss, eps)
 		);
 		lrl.append(&mut lrr);
 		lrl
@@ -341,7 +352,7 @@ impl<T> Polynomial<T> where T:
 			v.push(T::zero());
 			self.factors.remove(0);
 		}
-		v.append(&mut self.localize_roots(left, right).into_iter().map(|(mut l, mut r)| {
+		v.append(&mut self.localize_roots(left, right, &eps).into_iter().map(|(mut l, mut r)| {
 			let vrp = self.eval_ref(&r).is_positive();
 			while r.clone() - l.clone() > eps {
 				let m = (r.clone() + l.clone()) / (2i32).into();
