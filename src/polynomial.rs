@@ -346,15 +346,10 @@ impl<T> Polynomial<T> where T:
 		lrl
 	}
 	
-	pub fn find_roots(&mut self, left: T, right: T, eps: T) -> Vec<T> {
-		let mut v = Vec::new();
-		while !self.is_zero() && self.factors[0].is_zero() {
-			v.push(T::zero());
-			self.factors.remove(0);
-		}
-		v.append(&mut self.localize_roots(left, right, &eps).into_iter().map(|(mut l, mut r)| {
+	pub fn find_roots(&self, left: T, right: T, eps: &T) -> Vec<T> {
+		self.localize_roots(left, right, eps).into_iter().map(|(mut l, mut r)| {
 			let vrp = self.eval_ref(&r).is_positive();
-			while r.clone() - l.clone() > eps {
+			while r.clone() - l.clone() > *eps {
 				let m = (r.clone() + l.clone()) / (2i32).into();
 				let vmp = self.eval_ref(&m).is_positive();
 				if vmp == vrp {
@@ -364,8 +359,7 @@ impl<T> Polynomial<T> where T:
 				}
 			}
 			r
-		}).collect());
-		v
+		}).collect()
 	}
 }
 

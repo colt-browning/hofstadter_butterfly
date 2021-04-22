@@ -40,11 +40,11 @@ pub trait Appr: Decimal {
 				v.swap(i, 2*i);
 			}
 			v.truncate(q/2+1);
-			let mut p1 = Polynomial::from(v.clone());
-			let mut r1 = p1.find_roots(Self::zero(), Self::from(16), eps.clone());
+			let p1 = Polynomial::from(v.clone());
+			let mut r1 = p1.find_roots(Self::zero(), Self::from(16), &eps);
 			v.remove(0);
-			let mut p2 = Polynomial::from(v);
-			let mut r2 = p2.find_roots(Self::zero(), Self::from(16), eps);
+			let p2 = Polynomial::from(v);
+			let mut r2 = p2.find_roots(Self::zero(), Self::from(16), &eps);
 			let mut r = vec![Self::zero()];
 			r.append(&mut r1);
 			r.append(&mut r2);
@@ -55,7 +55,7 @@ pub trait Appr: Decimal {
 			for i in 1..=q/2 {
 				v[2*i] = Self::zero();
 			}
-			Polynomial::from(v).find_roots(Self::from(-4), Self::from(4), eps)
+			Polynomial::from(v).find_roots(Self::from(-4), Self::from(4), &eps)
 		};
 		r = r.into_iter().map(|x| x.accu(accu)).collect();
 		let mut nr = r.iter().map(|x| -x.clone()).collect();
