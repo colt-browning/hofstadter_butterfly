@@ -307,7 +307,6 @@ impl<T> Polynomial<T> where T:
 			ssl.iter().zip(&ssl[1..]).filter(|(x, y)| *x^*y).count(),
 			ssr.iter().zip(&ssr[1..]).filter(|(x, y)| *x^*y).count(),
 		);
-//		assert!(csr <= csl);
 		if let Some(n) = expected_roots {
 			let r = csl - csr;
 			if r != n {
@@ -325,19 +324,19 @@ impl<T> Polynomial<T> where T:
 	}
 
 	fn localize_roots_internal(&self, left: T, right: T, csl: usize, csr: usize, ss: &Vec<Self>, eps: &T) -> Vec<(T, T)> {
+		assert!(csl >= csr, "Polynomial degree {}:  {} >= {} must hold for nonnegative number of roots", ss[0].degree(), csl, csr);
 		if csr == csl {
 			return vec![]
 		} else if csl - csr == 1 {
 			return vec!((left, right))
 		}
 		let d = right.clone() - left.clone();
-		if d < eps.clone() {
+		if d < *eps {
 			return vec![(left, right); csl - csr]
 		}
 		let middle = (right.clone() + left.clone()) / (2i32).into();
 		let ssm = ss.iter().map(|p| p.eval_ref(&middle).is_positive()).collect::<Vec<_>>();
 		let csm = ssm.iter().zip(&ssm[1..]).filter(|(x, y)| *x^*y).count();
-//		assert!(csm <= csl && csm >= csr, "{}:  not {} >= {} >= {}", ss[0].degree(), csl, csm, csr);
 		let (mut lrl, mut lrr) = (
 			self.localize_roots_internal(left, middle.clone(), csl, csm, ss, eps),
 			self.localize_roots_internal(middle, right, csm, csr, ss, eps)
@@ -577,7 +576,7 @@ mod tests {
 	fn roots() {
 		let eps = 1e-14_f64;
 		let r = Polynomial::from(vec![-4.0, 0.0, 1.0])
-			.find_roots(-5.0, 5.0, eps);
+			.find_roots(-5.0, 5.0, &eps);
 		let r2 = vec![-2.0, 2.0];
 		assert!(r.len() == r2.len() && r.into_iter().zip(r2.into_iter()).all(|(x, x2)| (x-x2).abs() <= eps));
 	}
